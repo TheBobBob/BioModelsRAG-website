@@ -1,22 +1,12 @@
-#####importPackages
-from langchain_text_splitters import CharacterTextSplitter
+import tempfile
 import os
-import chromadb
-from chromadb.utils import embedding_functions
-import sentence_transformers 
-from sentence_transformers import SentenceTransformer
-import ollama
-
-#####downloadBioModels
 import requests
-import os
 import tellurium as te
-import simplesbml
 
 GITHUB_OWNER = "sys-bio"
 GITHUB_REPO_CACHE = "BiomodelsCache"
 BIOMODELS_JSON_DB_PATH = "src/cached_biomodels.json"
-LOCAL_DOWNLOAD_DIR = "downloaded_models"
+LOCAL_DOWNLOAD_DIR = tempfile.mkdtemp()  # Use a temporary directory
 
 cached_data = None
 
@@ -137,6 +127,8 @@ if __name__ == "__main__":
     main()
 
 #####splitBioModels
+from langchain_text_splitters import CharacterTextSplitter
+
 text_splitter2 = CharacterTextSplitter(
     separator="  // ",
     chunk_size=100,
@@ -147,22 +139,24 @@ text_splitter2 = CharacterTextSplitter(
 
 final_items = []
 
-directory = r"C:\Users\navan\Downloads\BioModelsRAG-website\downloaded_models"
-files = os.listdir(directory)
+files = os.listdir(LOCAL_DOWNLOAD_DIR)
 
 for file in files:
     if file.endswith('.txt'):  # Only process .txt files
-        file_path = os.path.join(directory, file)
+        file_path = os.path.join(LOCAL_DOWNLOAD_DIR, file)
         with open(file_path, 'r') as f:
             file_content = f.read()
             items = text_splitter2.create_documents([file_content])
             final_items.extend(items)
 
-
 #####createVectorDB
+import chromadb
+from chromadb.utils import embedding_functions
+import sentence_transformers 
+from sentence_transformers import SentenceTransformer
+import ollama
 
-CHROMA_DATA_PATH = r"CHROMA_EMBEDDINGS_PATH"
-COLLECTION_NAME = "BioRAG_Collection"
+CHROMA_DATA_PATH = tempfile.mkdtemp()  # Use a temporary directory
 EMBED_MODEL = "all-MiniLM-L6-v2"
 client = chromadb.PersistentClient(path = CHROMA_DATA_PATH)
 
@@ -170,8 +164,10 @@ embedding_func = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name=EMBED_MODEL
 )
 
+collection_name = input("What name would you like to give your chromadb collection? ")
+
 collection = client.create_collection(
-    name = "BioRAG_Collection",
+    name = collection_name,
     embedding_function=embedding_func,
     metadata={"hnsw:space": "cosine"},
 )
@@ -213,4 +209,3 @@ while 1==1:
     """
     response = ollama.generate(model = "llama3", prompt=prompt_template)
     print(response['response'])
-    
