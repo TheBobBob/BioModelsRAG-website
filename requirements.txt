@@ -4,7 +4,8 @@ ollama==0.3.2
 streamlit==1.38.0
 langchain-text-splitters==0.2.4
 chromadb==0.3.25
-chromadb
 Pillow
-protobuf==3.20.3
-pysqlite3-binary 
+protobuf==3.20.1
+pysqlite3-binary
+opentelemetry-api==1.12.0
+opentelemetry-sdk==1.12.0
