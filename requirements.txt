@@ -1,9 +1,9 @@
-requests==2.32.2
-tellurium==2.2.10
-ollama==0.3.2
-streamlit==1.38.0
-langchain-text-splitters==0.2.4
-chromadb==0.3.25
+requests
+tellurium
+ollama
+streamlit
+langchain-text-splitters
+chromadb
 Pillow
 protobuf==3.20.3
 pysqlite3-binary
