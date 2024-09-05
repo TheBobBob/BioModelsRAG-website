@@ -5,4 +5,4 @@ streamlit
 langchain-text-splitters
 chromadb
 Pillow
-protobuf
+protobuf==3.20.3
