@@ -9,3 +9,4 @@ protobuf==3.20.1
 pysqlite3-binary
 chromadb.telemetry.events
 chromadb.telemetry==1.12.0
+chromadb-telemetry==1.12.0
