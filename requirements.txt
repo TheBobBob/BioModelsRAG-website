@@ -7,4 +7,4 @@ chromadb==0.3.25
 chromadb
 Pillow
 protobuf==3.20.3
-sqlite3==3.46.0
+pysqlite3-binary 
