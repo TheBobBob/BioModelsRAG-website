@@ -4,3 +4,5 @@ ollama==0.3.2
 streamlit==1.38.0
 langchain-text-splitters==0.2.4
 chromadb==0.5.5
+protobuf==28.0
+
