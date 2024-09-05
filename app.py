@@ -7,6 +7,10 @@ import streamlit as st
 from langchain_text_splitters import CharacterTextSplitter
 import chromadb
 
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 # Constants and global variables
 GITHUB_OWNER = "sys-bio"
 GITHUB_REPO_CACHE = "BiomodelsCache"
