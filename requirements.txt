@@ -3,7 +3,7 @@ tellurium
 ollama
 streamlit
 langchain-text-splitters
-chromadb=0.3.25
+chromadb==0.3.25
 Pillow
 protobuf==3.20.3
 pysqlite3-binary
