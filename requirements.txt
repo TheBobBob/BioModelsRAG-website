@@ -7,6 +7,3 @@ chromadb==0.3.25
 Pillow
 protobuf==3.20.3
 pysqlite3-binary
-chromadb.telemetry.events
-chromadb.telemetry==1.12.0
-chromadb-telemetry==1.12.0
