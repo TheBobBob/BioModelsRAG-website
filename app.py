@@ -205,18 +205,16 @@ def streamlit_app():
         models = search_models(search_str)
         
         if models:
-            model_names = [model['name'] for model in models.values()]
-            selected_names = st.multiselect(
+            model_ids = list(models.keys())
+            selected_models = st.multiselect(
                 "Select biomodels to analyze",
-                options=model_names,
-                default=[model_names[0]] if model_names else []
+                options=model_ids,
+                default=[model_ids[0]]
             )
             
             if st.button("Analyze Selected Models"):
-                selected_model_ids = [model_id for model_id, model_data in models.items() if model_data['name'] in selected_names]
-                
                 all_final_items = []
-                for model_id in selected_model_ids:
+                for model_id in selected_models:
                     model_data = models[model_id]
                     
                     st.write(f"Selected model: {model_data['name']}")
