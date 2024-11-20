@@ -78,7 +78,7 @@ def search_models(search_str):
     return models
 
 def download_model_file(model_url, model_id):
-    model_url = f"https://raw.githubusercontent.com/konankisa/BiomodelsStore/main/biomodels/{model_id}/{model_id}_url.xml"
+    model_url = f"https://raw.githubusercontent.com/sys-bio/BiomodelsStore/main/biomodels/{model_id}/{model_id}_url.xml"
     response = requests.get(model_url)
     
     if response.status_code == 200:
