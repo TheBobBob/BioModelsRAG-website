@@ -10,7 +10,6 @@ import libsbml
 import networkx as nx
 from pyvis.network import Network
 
-
 CHROMA_DATA_PATH = tempfile.mkdtemp()
 EMBED_MODEL = "all-MiniLM-L6-v2"
 client = chromadb.PersistentClient(path = CHROMA_DATA_PATH)
@@ -18,11 +17,6 @@ collection_name = "BioModelsRAG"
 
 global db 
 db = client.get_or_create_collection(name=collection_name)
-
-#Todolists 
-#1. if MODEL (cannot download) don't even include (TICK)
-#2. switch the choosing and groq api key so if they just want to visualize thats fine (TICK)
-
 
 class BioModelFetcher:
     def __init__(self, github_owner="TheBobBob", github_repo_cache="BiomodelsCache", biomodels_json_db_path="src/cached_biomodels.json"):
