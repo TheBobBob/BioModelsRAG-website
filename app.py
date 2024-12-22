@@ -11,7 +11,6 @@ import networkx as nx
 from pyvis.network import Network
 
 CHROMA_DATA_PATH = tempfile.mkdtemp()
-EMBED_MODEL = "all-MiniLM-L6-v2"
 client = chromadb.PersistentClient(path = CHROMA_DATA_PATH)
 collection_name = "BioModelsRAG"
 
