@@ -10,12 +10,15 @@ import libsbml
 import networkx as nx
 from pyvis.network import Network
 
-CHROMA_DATA_PATH = tempfile.mkdtemp()
-client = chromadb.PersistentClient(path = CHROMA_DATA_PATH)
+client = chromadb.Client()
 collection_name = "BioModelsRAG"
 
 global db 
 db = client.get_or_create_collection(name=collection_name)
+
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 class BioModelFetcher:
     def __init__(self, github_owner="TheBobBob", github_repo_cache="BiomodelsCache", biomodels_json_db_path="src/cached_biomodels.json"):
@@ -116,7 +119,7 @@ class BioModelSplitter:
     def __init__(self, groq_api_key):
         self.groq_client = Groq(api_key=groq_api_key)
 
-    def split_biomodels(self, antimony_file_path, models):
+    def split_biomodels(self, antimony_file_path, models, model_id):
         text_splitter = CharacterTextSplitter(
             separator="  // ",
             chunk_size=1000,
@@ -125,33 +128,18 @@ class BioModelSplitter:
             is_separator_regex=False,
         )
 
-        directory_path = os.path.dirname(os.path.abspath(antimony_file_path))
-
-        files = os.listdir(directory_path)
-        for file in files:
-            file_path = os.path.join(directory_path, file)
-            try:
-                with open(file_path, 'r') as f:
-                    file_content = f.read()
-                    items = text_splitter.create_documents([file_content])
-                    self.create_vector_db(items, models)
-                    break
-            except Exception as e:
-                print(f"Error reading file {file_path}: {e}")
-
+        with open(antimony_file_path) as f: 
+            file_content = f.read() 
+            
+        items = text_splitter.create_documents([file_content])
+        self.create_vector_db(items, model_id)
         return db
 
-    def create_vector_db(self, final_items, models):
+    def create_vector_db(self, final_items, model_id):
         counter = 0
-        for model_id in models:
-            try:
-                results = db.get(where={"document": {"$eq": model_id}})
-
-                #might be a problem here? 
-                if results['documents']:
-                    continue
-                
-                #could also be a problem in how the IDs are created 
+        try:
+            results = db.get(where={"document": model_id})
+            if len(results['documents']) == 0:
                 for item in final_items:
                     counter += 1  # Increment counter for each item
                     item_id = f"{counter}_{model_id}"
@@ -183,8 +171,8 @@ class BioModelSplitter:
                         )
                     else:
                         print(f"Error: No content returned from Groq for model {model_id}.")
-            except Exception as e:
-                print(f"Error processing model {model_id}: {e}")
+        except Exception as e:
+            print(f"Error processing model {model_id}: {e}")
 
 
 class SBMLNetworkVisualizer:
@@ -282,6 +270,7 @@ class StreamlitApp:
             if models:
                 model_ids = list(models.keys())
                 model_ids = [model_id for model_id in model_ids if not str(model_id).startswith("MODEL")]
+
                 if models:    
                     selected_models = st.multiselect(
                         "Select biomodels to analyze",
@@ -299,7 +288,7 @@ class StreamlitApp:
 
                         net = self.visualizer.sbml_to_network(model_file_path)
 
-                        st.subheader(f"Model: {model_data['title']}")
+                        st.subheader(f"Model {model_data['title']}")
                         net.show(f"sbml_network_{model_id}.html")
 
                         HtmlFile = open(f"sbml_network_{model_id}.html", "r", encoding="utf-8")
@@ -320,7 +309,7 @@ class StreamlitApp:
                         antimony_file_path = model_file_path.replace(".xml", ".txt")
 
                         AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
-                        self.splitter.split_biomodels(antimony_file_path, selected_models)
+                        self.splitter.split_biomodels(antimony_file_path, selected_models, model_id)
                         
                         st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
 
@@ -351,7 +340,6 @@ class StreamlitApp:
             best_recommendation = query_results['documents']
             flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
             query_results_final += "\n\n".join(flat_recommendation) + "\n\n"
-
 
         prompt_template = f"""
         Using the context and previous conversation provided below, answer the following question. If the information is insufficient to answer the question, please state that clearly:
