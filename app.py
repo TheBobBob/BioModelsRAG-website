@@ -1,3 +1,7 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import os
 import requests
 import tellurium as te
@@ -15,10 +19,6 @@ collection_name = "BioModelsRAG"
 
 global db 
 db = client.get_or_create_collection(name=collection_name)
-
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 class BioModelFetcher:
     def __init__(self, github_owner="TheBobBob", github_repo_cache="BiomodelsCache", biomodels_json_db_path="src/cached_biomodels.json"):
