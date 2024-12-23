@@ -1,9 +1,11 @@
 requests
 tellurium
-ollama
 streamlit
-langchain-text-splitters
 chromadb==0.5.5
-Pillow
-protobuf==3.20.3
-pysqlite3-binary==0.5.3.post1
+langchain
+groq
+libsbml
+networkx
+pyvis
+pysqlite3-binary
+
