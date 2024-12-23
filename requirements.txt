@@ -4,7 +4,7 @@ streamlit
 chromadb==0.5.5
 langchain
 groq
-libsbml
+python-libsbml
 networkx
 pyvis
 pysqlite3-binary
