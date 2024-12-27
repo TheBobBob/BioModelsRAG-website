@@ -1,5 +1,5 @@
-__import__('pysqlite3')
-import sys
+__import__('pysqlite3') 
+import sys 
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 import os
@@ -53,17 +53,20 @@ class BioModelSearch:
         query_text = search_str.strip().lower()
         models = {}
 
-        for model_id, model_data in cached_data.items():
-            if 'name' in model_data:
-                name = model_data['name'].lower()
-                url = model_data['url']
-                title = model_data['title']
-                authors = model_data['authors']
+        if query_text:
+            query_words = [word.strip() for word in query_text.replace(',', ' ').split()]
 
-                if query_text:
-                    if ' ' in query_text:
-                        query_words = query_text.split(" ")
-                        if all(word in ' '.join([str(v).lower() for v in model_data.values()]) for word in query_words):
+            for model_id, model_data in cached_data.items():
+                if 'name' in model_data:
+                    name = model_data.get('name', '').lower()
+                    url = model_data.get('url', '').lower()
+                    title = model_data.get('title', '').lower()
+                    authors = ' '.join([author.lower() for author in model_data.get('authors', [])])
+
+                    combined_data = ' '.join([name, url, title, authors, model_id])
+
+                    for word in query_words: 
+                        if word in combined_data:
                             models[model_id] = {
                                 'ID': model_id,
                                 'name': name,
@@ -71,18 +74,8 @@ class BioModelSearch:
                                 'title': title,
                                 'authors': authors,
                             }
-                    else:
-                        if query_text in ' '.join([str(v).lower() for v in model_data.values()]):
-                            models[model_id] = {
-                                'ID': model_id,
-                                'name': name,
-                                'url': url,
-                                'title': title,
-                                'authors': authors,
-                            }
-        
+
         return models
-
 
 class ModelDownloader:
     @staticmethod
@@ -141,16 +134,19 @@ class BioModelSplitter:
             results = db.get(where={"document": model_id})
             if len(results['documents']) == 0:
                 for item in final_items:
-                    counter += 1  # Increment counter for each item
+                    counter += 1
                     item_id = f"{counter}_{model_id}"
 
-                    # Construct the prompt
                     prompt = f"""
-                    Summarize the following segment of Antimony in a clear and concise manner:
-                    1. Provide a detailed summary using a reasonable number of words. 
-                    2. Maintain all original values and include any mathematical expressions or values in full. 
-                    3. Ensure that all variable names and their values are clearly presented. 
-                    4. Write the summary in paragraph format, putting an emphasis on clarity and completeness. 
+                    Summarize the following segment of Antimony in a clear, concise, and well-structured manner. Your summary should adhere to the following guidelines:
+
+                    1. **Detailed Summary**: Provide a comprehensive summary that accurately reflects the original content. Include relevant details without omitting key points.
+                    
+                    2. **Mathematical Expressions**: If the segment contains mathematical expressions, assignment rules, or any formulae, **do not alter or simplify them**. They should be included exactly as they appear.
+
+                    3. **Variable Names and Values**: Ensure that all variables and their corresponding values are clearly identified and preserved in your summary. Be sure to maintain the original format for variable names and values.
+
+                    4. **Clarity and Completeness**: Write the summary in clear, coherent paragraphs. Prioritize clarity and ensure all information is conveyed accurately and completely.
 
                     Segment of Antimony: {item}
                     """
@@ -163,11 +159,12 @@ class BioModelSplitter:
                         model="llama-3.1-8b-instant",
                     )
 
+                    final_summary = model_id + "\n\n" + chat_completion.choices[0].message.content
                     if chat_completion.choices[0].message.content:
                         db.upsert(
                             ids=[item_id],
                             metadatas=[{"document": model_id}],
-                            documents=[chat_completion.choices[0].message.content],
+                            documents=[final_summary],
                         )
                     else:
                         print(f"Error: No content returned from Groq for model {model_id}.")
@@ -277,8 +274,10 @@ class StreamlitApp:
                         options=model_ids,
                         default=[model_ids[0]]
                     )
+            else: 
+                st.info("No models were found, please enter a different query. ")
 
-            if models:
+            if models and selected_models:
                 if st.button("Visualize selected models"):
                     for model_id in selected_models:
                         model_data = models[model_id]
@@ -334,12 +333,16 @@ class StreamlitApp:
         for model_id in models:
             query_results = db.query(
                 query_texts = prompt,
-                n_results=5,
+                n_results=3,
                 where={"document": {"$eq": model_id}},
             )
+            
             best_recommendation = query_results['documents']
             flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
-            query_results_final += "\n\n".join(flat_recommendation) + "\n\n"
+            query_results_final += "\n".join(flat_recommendation) + "\n\n"
+        
+        print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print(query_results_final)
 
         prompt_template = f"""
         Using the context and previous conversation provided below, answer the following question. If the information is insufficient to answer the question, please state that clearly:
@@ -352,7 +355,9 @@ class StreamlitApp:
 
         Instructions:
         1. Cross-Reference: Use all provided context to define variables and identify any unknown entities. 
+        
         2. Mathematical Calculations: Perform any necessary calculations based on the context and available data. 
+        
         3. Consistency: Remember and incorporate previous responses if the question is related to earlier information.
 
         Question: 
