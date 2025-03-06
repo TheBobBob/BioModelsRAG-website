@@ -293,7 +293,9 @@ class StreamlitApp:
                         HtmlFile = open(f"sbml_network_{model_id}.html", "r", encoding="utf-8")
                         st.components.v1.html(HtmlFile.read(), height=600)
                         
-            GROQ_API_KEY = st.text_input("Enter a GROQ API Key (which is free to make!):", key = "api_keys")
+            GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
+            url = "https://console.groq.com/keys"
+            st.write("Pleaes click on the following link to get a GROQ API key [link](%s)" % url)
             self.splitter = BioModelSplitter(GROQ_API_KEY)
             
             if GROQ_API_KEY:
