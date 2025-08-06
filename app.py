@@ -175,6 +175,8 @@ class BioModelSplitter:
 class SBMLNetworkVisualizer:
     @staticmethod
     def sbml_to_network(file_path):
+        st.set_page_config(layout="wide")
+
         reader = libsbml.SBMLReader()
         document = reader.readSBML(file_path)
         model = document.getModel()
@@ -379,3 +381,4 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
