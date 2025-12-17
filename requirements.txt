@@ -2,10 +2,11 @@ requests
 tellurium
 streamlit
 chromadb==0.5.5
-langchain
+langchain_text_splitters
 groq
 python-libsbml
 networkx
 pyvis
 pysqlite3-binary
+
 
