@@ -245,6 +245,11 @@ class SBMLNetworkVisualizer:
         """)
         return net
 
+def visualize(params, models_map):         
+    r = te.loada(model)
+    result = r.simulate(self.params[0],self.params[1],self.params[2]) 
+    fig = r.plot(result, show=False)  # Prevent Tellurium from immediately showing
+    return fig
 
 class StreamlitApp:
     def __init__(self):
@@ -297,7 +302,7 @@ class StreamlitApp:
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
-            st.write("Pleaes click on the following link to get a GROQ API key [link](%s)" % url)
+            st.write("Please click on the following link to get a GROQ API key [link](%s)" % url)
             self.splitter = BioModelSplitter(GROQ_API_KEY)
             
             if GROQ_API_KEY:
@@ -315,21 +320,58 @@ class StreamlitApp:
                         self.splitter.split_biomodels(antimony_file_path, selected_models, model_id)
                         
                         st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
-
-                prompt_fin = st.chat_input("Enter Q when you would like to quit! ", key = "input_1")
+                        
+                if st.button("Simulate model"):
+                    params = str(st.text_input("Please enter the params with which you would like to simulate the model as comma separated values", key="params")).split(",")
+                    fig = visualize(params, models)
+                    with st.expander("See model"):
+                        st.pyplot(fig)
+                        
+                # Initialize chat mode state
+                if "in_modification_chat" not in st.session_state:
+                    st.session_state.in_modification_chat = False
                 
-                if prompt_fin: 
-                    prompt = str(prompt_fin)
-                    st.session_state.messages.append({"role": "user", "content": prompt})
+                prompt_fin = st.chat_input(
+                    "Enter Q to quit, START to enter model modification chat, STOP to exit it.", 
+                    key="input_1"
+                )
+                
+                if prompt_fin:
+                    prompt = prompt_fin.strip()
+                    upper_prompt = prompt.upper()
+                
+                    # Handle quitting
+                    if upper_prompt == "Q":
+                        st.info("Chat ended.")
+                
+                    # Enter modification chat
+                    elif upper_prompt == "START":
+                        st.session_state.in_modification_chat = True
+                        st.info("You have entered a model modification chat.")
+                
+                    # Exit modification chat
+                    elif upper_prompt == "STOP":
+                        if st.session_state.in_modification_chat:
+                            st.session_state.in_modification_chat = False
+                            st.info("You have exited the model modification chat.")
+                        else:
+                            st.info("You are not in a model modification chat.")
+                
+                    # Regular or modification chat message
+                    else:
+                        role = "user"
+                        st.session_state.messages.append({"role": role, "content": prompt})
+                
+                        history = st.session_state.messages[-6:]
+                        response = self.generate_response(prompt, history, models)
+                
+                        st.session_state.messages.append({"role": "assistant", "content": response})
+            
+            # Display all chat messages
+                for message in st.session_state.messages:
+                    with st.chat_message(message["role"]):
+                        st.markdown(message["content"])
 
-                    history = st.session_state.messages[-6:]
-                    response = self.generate_response(prompt, history, models)
-
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-
-                    for message in st.session_state.messages:
-                        with st.chat_message(message["role"]):
-                            st.markdown(message["content"])
                             
     def generate_response(self, prompt, history, models):
         query_results_final = ""
@@ -381,6 +423,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
