@@ -127,7 +127,7 @@ class BioModelSplitter:
         items = text_splitter.create_documents([file_content])
         self.create_vector_db(items, model_id)
         return db
-
+    
     def create_vector_db(self, final_items, model_id):
         counter = 0
         try:
@@ -245,12 +245,39 @@ class SBMLNetworkVisualizer:
         """)
         return net
 
-def visualize(params, models_map):         
+def visualize(params, models_map, model): 
+    model_ids = list(models_map.keys())
+    selected_models = st.multiselect(
+        "Select biomodels to analyze",
+        options=model_ids,
+        default=[model_ids[0]]
+    )
+    all_visualizations = set() 
+    for model_id in selected_models.keys(): 
+        all_visualizations.add(visualize_helper(params, models_map.get(model_id))
+    return all_visualizations
+        
+def visualize_helper(params, model):
     r = te.loada(model)
     result = r.simulate(self.params[0],self.params[1],self.params[2]) 
     fig = r.plot(result, show=False)  # Prevent Tellurium from immediately showing
     return fig
 
+def get_antimony(selected_models, models): 
+    antimony_paths = set()
+    for model_id in selected_models:
+        model_data = models[model_id]
+
+        st.write(f"Selected model: {model_data['name']}")
+
+        model_url = model_data['url']
+        model_file_path = self.downloader.download_model_file(model_url, model_id, self.fetcher.local_download_dir)
+        antimony_file_path = model_file_path.replace(".xml", ".txt")
+
+        AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
+        antimony_paths.add(antimony_file_path) 
+    return antimony_paths
+    
 class StreamlitApp:
     def __init__(self):
         self.fetcher = BioModelFetcher()
@@ -304,32 +331,25 @@ class StreamlitApp:
             url = "https://console.groq.com/keys"
             st.write("Please click on the following link to get a GROQ API key [link](%s)" % url)
             self.splitter = BioModelSplitter(GROQ_API_KEY)
+
             
             if GROQ_API_KEY:
                 if st.button("Analyze Selected Models"):
                     with st.spinner("Analyzing selected models... This may take a while."):
-                        for model_id in selected_models:
-                            model_data = models[model_id]
-    
-                            st.write(f"Selected model: {model_data['name']}")
-    
-                            model_url = model_data['url']
-                            model_file_path = self.downloader.download_model_file(model_url, model_id, self.fetcher.local_download_dir)
-                            antimony_file_path = model_file_path.replace(".xml", ".txt")
-    
-                            AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
-                            self.splitter.split_biomodels(antimony_file_path, selected_models, model_id)
-                            
+                        antimony_model_paths = get_antimony(selected_models, models)
+                        for antimony_path in antimony_model_paths:
+                            self.splitter.split_biomodels(antimony_path, selected_models, model_id)
                             st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
                         
-                if st.button("Simulate model"):
+                if st.button("Simulate model(s)"):
+                    antimony_model_paths = get_antimony(selected_models, models)
                     params = str(st.text_input("Please enter the params with which you would like to simulate the model as comma separated values", key="params")).split(",")
-                    fig = visualize(params, models)
+                    fig = visualize(params, selected_models)
                     with st.expander("See model"):
                         st.pyplot(fig)
                 
                 prompt_fin = st.chat_input(
-                    "Enter Q to quit, START to enter model modification chat, STOP to exit it.", 
+                    "Enter Q to quit.", 
                     key="input_1"
                 )
                 
@@ -353,7 +373,6 @@ class StreamlitApp:
                 for message in st.session_state.messages:
                     with st.chat_message(message["role"]):
                         st.markdown(message["content"])
-
                             
     def generate_response(self, prompt, history, models):
         query_results_final = ""
@@ -406,6 +425,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
