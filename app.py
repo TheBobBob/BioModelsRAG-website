@@ -264,7 +264,7 @@ def visualize_helper(params, model):
     return fig
 
 def get_antimony(selected_models, models): 
-    antimony_paths = set()
+    antimony_paths = {}
     for model_id in selected_models:
         model_data = models[model_id]
 
@@ -275,7 +275,7 @@ def get_antimony(selected_models, models):
         antimony_file_path = model_file_path.replace(".xml", ".txt")
 
         AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
-        antimony_paths.add(antimony_file_path) 
+        antimony_paths[model_data['name']] = antimony_file_path
     return antimony_paths
     
 class StreamlitApp:
@@ -343,10 +343,15 @@ class StreamlitApp:
                         
                 if st.button("Simulate model(s)"):
                     antimony_model_paths = get_antimony(selected_models, models)
-                    params = str(st.text_input("Please enter the params with which you would like to simulate the model as comma separated values", key="params")).split(",")
-                    fig = visualize(params, selected_models)
-                    with st.expander("See model"):
-                        st.pyplot(fig)
+                    params = str(st.text_input("Please enter the params with which you would like to simulate the model(s) as comma separated values :)", key="params")).split(",")
+                    ncol = len(antimony_model_paths.keys())
+                    cols = st.columns(ncol)
+                    for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
+                        with col: 
+                            with st.expander(f"Model: {antimony_id}"): 
+                                fig = visualize(
+                                st.pyplot(fig, use_container_width=True)
+                            
                 
                 prompt_fin = st.chat_input(
                     "Enter Q to quit.", 
@@ -425,6 +430,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
