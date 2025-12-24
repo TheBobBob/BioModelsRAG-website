@@ -307,29 +307,26 @@ class StreamlitApp:
             
             if GROQ_API_KEY:
                 if st.button("Analyze Selected Models"):
-                    for model_id in selected_models:
-                        model_data = models[model_id]
-
-                        st.write(f"Selected model: {model_data['name']}")
-
-                        model_url = model_data['url']
-                        model_file_path = self.downloader.download_model_file(model_url, model_id, self.fetcher.local_download_dir)
-                        antimony_file_path = model_file_path.replace(".xml", ".txt")
-
-                        AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
-                        self.splitter.split_biomodels(antimony_file_path, selected_models, model_id)
-                        
-                        st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
+                    with st.spinner("Analyzing selected models... This may take a while."):
+                        for model_id in selected_models:
+                            model_data = models[model_id]
+    
+                            st.write(f"Selected model: {model_data['name']}")
+    
+                            model_url = model_data['url']
+                            model_file_path = self.downloader.download_model_file(model_url, model_id, self.fetcher.local_download_dir)
+                            antimony_file_path = model_file_path.replace(".xml", ".txt")
+    
+                            AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
+                            self.splitter.split_biomodels(antimony_file_path, selected_models, model_id)
+                            
+                            st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
                         
                 if st.button("Simulate model"):
                     params = str(st.text_input("Please enter the params with which you would like to simulate the model as comma separated values", key="params")).split(",")
                     fig = visualize(params, models)
                     with st.expander("See model"):
                         st.pyplot(fig)
-                        
-                # Initialize chat mode state
-                if "in_modification_chat" not in st.session_state:
-                    st.session_state.in_modification_chat = False
                 
                 prompt_fin = st.chat_input(
                     "Enter Q to quit, START to enter model modification chat, STOP to exit it.", 
@@ -343,21 +340,6 @@ class StreamlitApp:
                     # Handle quitting
                     if upper_prompt == "Q":
                         st.info("Chat ended.")
-                
-                    # Enter modification chat
-                    elif upper_prompt == "START":
-                        st.session_state.in_modification_chat = True
-                        st.info("You have entered a model modification chat.")
-                
-                    # Exit modification chat
-                    elif upper_prompt == "STOP":
-                        if st.session_state.in_modification_chat:
-                            st.session_state.in_modification_chat = False
-                            st.info("You have exited the model modification chat.")
-                        else:
-                            st.info("You are not in a model modification chat.")
-                
-                    # Regular or modification chat message
                     else:
                         role = "user"
                         st.session_state.messages.append({"role": role, "content": prompt})
@@ -409,13 +391,14 @@ class StreamlitApp:
         Question: 
         {prompt}
         """
-        chat_completion = self.splitter.groq_client.chat.completions.create(
-            messages=[{
-                "role": "user",
-                "content": prompt_template,
-            }],
-            model="llama-3.1-8b-instant",
-        )
+        with st.spinner("Generating response..."):
+            chat_completion = self.splitter.groq_client.chat.completions.create(
+                messages=[{
+                    "role": "user",
+                    "content": prompt_template,
+                }],
+                model="llama-3.1-8b-instant",
+            )
         
         return chat_completion.choices[0].message.content
 
@@ -423,6 +406,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
