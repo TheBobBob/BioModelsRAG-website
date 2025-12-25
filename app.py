@@ -343,7 +343,7 @@ class StreamlitApp:
                     )
                 
                     if st.button("Start simulation"):
-                        params = [p.strip() for p in params_raw.split(",")]
+                        params = [int(p).strip() for p in params_raw.split(",")]
                         antimony_model_paths = get_antimony(selected_simulate_models, models)
                 
                         ncol = len(antimony_model_paths)
@@ -448,6 +448,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
