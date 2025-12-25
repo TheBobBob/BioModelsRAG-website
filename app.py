@@ -307,7 +307,14 @@ class StreamlitApp:
                 st.info("No models were found, please enter a different query. ")
 
             if models and selected_models:
+                # Visualization
+                if "show_viz" not in st.session_state:
+                    st.session_state.show_viz = False
+                
                 if st.button("Visualize selected models"):
+                    st.session_state.show_viz = True
+                
+                if st.session_state.show_viz:
                     for model_id in selected_models:
                         model_data = models[model_id]
                         model_url = model_data['url']
@@ -317,11 +324,12 @@ class StreamlitApp:
                         net = self.visualizer.sbml_to_network(model_file_path)
 
                         st.subheader(f"Model {model_data['title']}")
-                        net.show(f"sbml_network_{model_id}.html")
+                        net.write_html(f"sbml_network_{model_id}.html")
 
                         HtmlFile = open(f"sbml_network_{model_id}.html", "r", encoding="utf-8")
                         st.components.v1.html(HtmlFile.read(), height=600, width=1800)
 
+                # Simulate
                 if "simulate_mode" not in st.session_state:
                     st.session_state.simulate_mode = False
                 
@@ -444,6 +452,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
