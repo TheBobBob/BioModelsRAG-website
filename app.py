@@ -420,6 +420,7 @@ class StreamlitApp:
             )
             
             best_recommendation = query_results['documents']
+            st.write(best_recommendation)
             flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
             query_results_final += "\n".join(flat_recommendation) + "\n\n"
         
@@ -460,6 +461,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
