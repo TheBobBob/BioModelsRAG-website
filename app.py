@@ -359,7 +359,9 @@ class StreamlitApp:
                                 with open(antimony_model_paths[antimony_id]) as f:
                                     file_content = f.read()
                                 fig = visualize(params, file_content)
-                                st.pyplot(fig, use_container_width = True)
+                                if fig == None: 
+                                    st.write("no fig made")
+                                st.pyplot(fig, width='stretch')
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
@@ -452,6 +454,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
