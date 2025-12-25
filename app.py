@@ -253,8 +253,7 @@ class SBMLNetworkVisualizer:
 def visualize(params, model):
     r = te.loada(model)
     result = r.simulate(params[0],params[1],params[2]) 
-    fig = r.plot(result, show=False)  # Prevent Tellurium from immediately showing
-    return fig
+    r.plot(result)
 
 def get_antimony(selected_models, models): 
     antimony_paths = {}
@@ -346,16 +345,11 @@ class StreamlitApp:
                         params = [int(p.strip()) for p in params_raw.split(",")]
                         antimony_model_paths = get_antimony(selected_simulate_models, models)
                 
-                        ncol = len(antimony_model_paths)
-                        cols = st.columns(ncol)
-                
-                        for col, antimony_id in zip(cols, antimony_model_paths.keys()):
-                            with col:
-                                with st.expander(f"Model: {antimony_id}"):
-                                    with open(antimony_model_paths[antimony_id]) as f:
-                                        file_content = f.read()
-                                    fig = visualize(params, file_content)
-                                    st.pyplot(fig, use_container_width=True)
+                        for antimony_id in antimony_model_paths.keys():
+                            with st.expander(f"Model: {antimony_id}"):
+                                with open(antimony_model_paths[antimony_id]) as f:
+                                    file_content = f.read()
+                                visualize(params, file_content)
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
@@ -448,6 +442,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
