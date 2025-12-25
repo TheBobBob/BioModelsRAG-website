@@ -32,10 +32,13 @@ class BioModelFetcher:
         url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repo_cache}/contents/{self.biomodels_json_db_path}"
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_TOKEN}"}
         response = requests.get(url, headers=headers)
-
-        st.write(response.status_code)
-        st.write(url)
-        st.write(GITHUB_TOKEN)
+        
+        r = requests.get("https://api.github.com/user", headers={
+            "Authorization": f"Bearer {GITHUB_TOKEN}",
+        })
+        
+        st.write("Status:", r.status_code)
+        st.write("Response:", r.text)
         if response.status_code == 200:
             data = response.json()
 
@@ -428,6 +431,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
