@@ -381,7 +381,7 @@ class StreamlitApp:
                         antimony_model_paths = get_antimony(selected_models, models)
                         for model_id, antimony_path in zip(antimony_model_paths.keys(), antimony_model_paths.values()):
                             self.splitter.split_biomodels(antimony_path, selected_models, model_id)
-                            st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
+                            st.info(f"Model {model_id} has successfully been added to the database! :) ")
                 
                 prompt_fin = st.chat_input(
                     "Enter Q to quit.", 
@@ -460,6 +460,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
