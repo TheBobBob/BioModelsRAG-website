@@ -42,9 +42,9 @@ class BioModelFetcher:
 
                 return json_data
             else:
-                raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache}")
+                raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of status code.")
         else:
-            raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache}")
+            raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of download_url")
 
 
 class BioModelSearch:
@@ -424,4 +424,5 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
