@@ -19,6 +19,7 @@ collection_name = "BioModelsRAG"
 
 global db 
 db = client.get_or_create_collection(name=collection_name)
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 
 class BioModelFetcher:
     def __init__(self, github_owner="TheBobBob", github_repo_cache="BiomodelsCache", biomodels_json_db_path="src/cached_biomodels.json"):
@@ -29,7 +30,7 @@ class BioModelFetcher:
 
     def fetch_github_json(self):
         url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repo_cache}/contents/{self.biomodels_json_db_path}"
-        headers = {"Accept": "application/vnd.github+json"}
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_TOKEN}"}
         response = requests.get(url, headers=headers)
 
         st.write(response.status_code)
@@ -426,6 +427,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
