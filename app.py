@@ -253,7 +253,8 @@ class SBMLNetworkVisualizer:
 def visualize(params, model):
     r = te.loada(model)
     result = r.simulate(params[0],params[1],params[2]) 
-    r.plot(result)
+    fig = r.plot(result, show=False)
+    return fig
 
 def get_antimony(selected_models, models): 
     antimony_paths = {}
@@ -349,7 +350,8 @@ class StreamlitApp:
                             with st.expander(f"Model: {antimony_id}"):
                                 with open(antimony_model_paths[antimony_id]) as f:
                                     file_content = f.read()
-                                visualize(params, file_content)
+                                fig = visualize(params, file_content)
+                                st.pyplot(fig, use_container_width = True)
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
