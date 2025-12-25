@@ -261,6 +261,7 @@ def visualize(params, model, antimony_id):
         savefig=f'simulation_plot_{antimony_id}.png', # Save the figure as a PNG file
         dpi=300 # Set the resolution of the saved image
     )
+    savefig=f'simulation_plot_{antimony_id}.png'
     return savefig
 
 def get_antimony(selected_models, models): 
@@ -459,6 +460,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
