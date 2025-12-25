@@ -35,6 +35,7 @@ class BioModelFetcher:
 
         st.write(response.status_code)
         st.write(url)
+        st.write(GITHUB_TOKEN)
         if response.status_code == 200:
             data = response.json()
 
@@ -427,6 +428,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
