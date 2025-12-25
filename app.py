@@ -37,8 +37,6 @@ class BioModelFetcher:
             "Authorization": f"Bearer {GITHUB_TOKEN}",
         })
         
-        st.write("Status:", r.status_code)
-        st.write("Response:", r.text)
         if response.status_code == 200:
             data = response.json()
 
@@ -266,7 +264,9 @@ def get_antimony(selected_models, models):
         st.write(f"Selected model: {model_data['name']}")
 
         model_url = model_data['url']
-        model_file_path = self.downloader.download_model_file(model_url, model_id, self.fetcher.local_download_dir)
+        downloader = ModelDownloader()
+        fetcher = BioModelFetcher()
+        model_file_path = downloader.download_model_file(model_url, model_id, fetcher.local_download_dir)
         antimony_file_path = model_file_path.replace(".xml", ".txt")
 
         AntimonyConverter.convert_sbml_to_antimony(model_file_path, antimony_file_path)
@@ -431,6 +431,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
