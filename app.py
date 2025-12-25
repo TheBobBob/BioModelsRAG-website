@@ -330,15 +330,17 @@ class StreamlitApp:
                     )
                     antimony_model_paths = get_antimony(selected_simulate_models, models)
                     params = str(st.text_input("Please enter the params with which you would like to simulate the model(s) as comma separated values :)", key="params")).split(",")
-                    ncol = len(antimony_model_paths.keys())
-                    cols = st.columns(ncol)
-                    for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
-                        with col: 
-                            with st.expander(f"Model: {antimony_id}"): 
-                                with open(antimony_model_paths[antimony_id]) as f: 
-                                    file_content = f.read() 
-                                fig = visualize(params, file_content)
-                                st.pyplot(fig, use_container_width=True)
+                    
+                    if st.button("Start simulation"):
+                        ncol = len(antimony_model_paths.keys())
+                        cols = st.columns(ncol)
+                        for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
+                            with col: 
+                                with st.expander(f"Model: {antimony_id}"): 
+                                    with open(antimony_model_paths[antimony_id]) as f: 
+                                        file_content = f.read() 
+                                    fig = visualize(params, file_content)
+                                    st.pyplot(fig, use_container_width=True)
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
@@ -431,6 +433,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
