@@ -252,7 +252,7 @@ class SBMLNetworkVisualizer:
         
 def visualize(params, model):
     r = te.loada(model)
-    result = r.simulate(self.params[0],self.params[1],self.params[2]) 
+    result = r.simulate(params[0],params[1],params[2]) 
     fig = r.plot(result, show=False)  # Prevent Tellurium from immediately showing
     return fig
 
@@ -431,6 +431,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
