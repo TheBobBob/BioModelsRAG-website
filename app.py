@@ -245,7 +245,7 @@ class SBMLNetworkVisualizer:
         """)
         return net
 
-def visualize(params, models_map, model): 
+def visualize(params, model): 
     model_ids = list(models_map.keys())
     selected_models = st.multiselect(
         "Select biomodels to analyze",
@@ -257,7 +257,7 @@ def visualize(params, models_map, model):
         all_visualizations.add(visualize_helper(params, models_map.get(model_id))
     return all_visualizations
         
-def visualize_helper(params, model):
+def visualize(params, model):
     r = te.loada(model)
     result = r.simulate(self.params[0],self.params[1],self.params[2]) 
     fig = r.plot(result, show=False)  # Prevent Tellurium from immediately showing
@@ -326,6 +326,24 @@ class StreamlitApp:
 
                         HtmlFile = open(f"sbml_network_{model_id}.html", "r", encoding="utf-8")
                         st.components.v1.html(HtmlFile.read(), height=600, width=1800)
+
+                if st.button("Simulate model(s)"):
+                    selected_simulate_models = st.multiselect(
+                        "Select biomodels to analyze",
+                        options=selected_models,
+                        default=[model_ids[0]]
+                    )
+                    antimony_model_paths = get_antimony(selected_simulate_models, models)
+                    params = str(st.text_input("Please enter the params with which you would like to simulate the model(s) as comma separated values :)", key="params")).split(",")
+                    ncol = len(antimony_model_paths.keys())
+                    cols = st.columns(ncol)
+                    for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
+                        with col: 
+                            with st.expander(f"Model: {antimony_id}"): 
+                                with open(antimony_model_paths[antimony_id]) as f: 
+                                    file_content = f.read() 
+                                fig = visualize(params, file_content)
+                                st.pyplot(fig, use_container_width=True)
                         
             GROQ_API_KEY = st.text_input("Enter a GROQ API key (which is free to make!):", key = "api_keys")
             url = "https://console.groq.com/keys"
@@ -340,18 +358,6 @@ class StreamlitApp:
                         for antimony_path in antimony_model_paths:
                             self.splitter.split_biomodels(antimony_path, selected_models, model_id)
                             st.info(f"Model {model_id} {model_data['name']} has successfully been added to the database! :) ")
-                        
-                if st.button("Simulate model(s)"):
-                    antimony_model_paths = get_antimony(selected_models, models)
-                    params = str(st.text_input("Please enter the params with which you would like to simulate the model(s) as comma separated values :)", key="params")).split(",")
-                    ncol = len(antimony_model_paths.keys())
-                    cols = st.columns(ncol)
-                    for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
-                        with col: 
-                            with st.expander(f"Model: {antimony_id}"): 
-                                fig = visualize(
-                                st.pyplot(fig, use_container_width=True)
-                            
                 
                 prompt_fin = st.chat_input(
                     "Enter Q to quit.", 
@@ -430,10 +436,3 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
-
-
-
-
-
-
-
