@@ -322,23 +322,38 @@ class StreamlitApp:
                         HtmlFile = open(f"sbml_network_{model_id}.html", "r", encoding="utf-8")
                         st.components.v1.html(HtmlFile.read(), height=600, width=1800)
 
+                if "simulate_mode" not in st.session_state:
+                    st.session_state.simulate_mode = False
+                
+                # Button toggles simulation mode ON
                 if st.button("Simulate model(s)"):
+                    st.session_state.simulate_mode = True
+                
+                if st.session_state.simulate_mode:
                     selected_simulate_models = st.multiselect(
-                        "Select biomodels to analyze",
+                        "Select biomodels to simulate",
                         options=selected_models,
-                        default=[model_ids[0]]
+                        default=[selected_models[0]],
+                        key="simulate_select"
                     )
-                    antimony_model_paths = get_antimony(selected_simulate_models, models)
-                    params = str(st.text_input("Please enter the params with which you would like to simulate the model(s) as comma separated values :)", key="params")).split(",")
-                    
+                
+                    params_raw = st.text_input(
+                        "Enter params (comma-separated):",
+                        key="params"
+                    )
+                
                     if st.button("Start simulation"):
-                        ncol = len(antimony_model_paths.keys())
+                        params = [p.strip() for p in params_raw.split(",")]
+                        antimony_model_paths = get_antimony(selected_simulate_models, models)
+                
+                        ncol = len(antimony_model_paths)
                         cols = st.columns(ncol)
-                        for col, antimony_id in zip(cols, antimony_model_paths.keys()): 
-                            with col: 
-                                with st.expander(f"Model: {antimony_id}"): 
-                                    with open(antimony_model_paths[antimony_id]) as f: 
-                                        file_content = f.read() 
+                
+                        for col, antimony_id in zip(cols, antimony_model_paths.keys()):
+                            with col:
+                                with st.expander(f"Model: {antimony_id}"):
+                                    with open(antimony_model_paths[antimony_id]) as f:
+                                        file_content = f.read()
                                     fig = visualize(params, file_content)
                                     st.pyplot(fig, use_container_width=True)
                         
@@ -433,6 +448,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
