@@ -244,18 +244,6 @@ class SBMLNetworkVisualizer:
         }
         """)
         return net
-
-def visualize(params, model): 
-    model_ids = list(models_map.keys())
-    selected_models = st.multiselect(
-        "Select biomodels to analyze",
-        options=model_ids,
-        default=[model_ids[0]]
-    )
-    all_visualizations = set() 
-    for model_id in selected_models.keys(): 
-        all_visualizations.add(visualize_helper(params, models_map.get(model_id))
-    return all_visualizations
         
 def visualize(params, model):
     r = te.loada(model)
@@ -436,3 +424,4 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
