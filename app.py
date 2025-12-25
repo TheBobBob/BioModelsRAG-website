@@ -31,7 +31,8 @@ class BioModelFetcher:
         url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repo_cache}/contents/{self.biomodels_json_db_path}"
         headers = {"Accept": "application/vnd.github+json"}
         response = requests.get(url, headers=headers)
-        
+
+        st.write(response.status_code)
         if response.status_code == 200:
             data = response.json()
 
@@ -42,9 +43,9 @@ class BioModelFetcher:
 
                 return json_data
             else:
-                raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of status code.")
+                raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of download url.")
         else:
-            raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of download_url")
+            raise ValueError(f"Unable to fetch model DB from GitHub repository: {self.github_owner} - {self.github_repo_cache} because of status code")
 
 
 class BioModelSearch:
@@ -424,5 +425,6 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
