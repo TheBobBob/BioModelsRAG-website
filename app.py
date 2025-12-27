@@ -165,6 +165,7 @@ class BioModelSplitter:
                     )
 
                     final_summary = model_id + "\n\n" + chat_completion.choices[0].message.content
+                    st.write(final_summary)
                     if chat_completion.choices[0].message.content:
                         db.upsert(
                             ids=[item_id],
@@ -414,7 +415,7 @@ class StreamlitApp:
 
         for model_id in models:
             query_results = db.query(
-                query_texts = prompt,
+                query_texts = [prompt],
                 n_results=3,
                 where={"document": {"$eq": model_id}},
             )
@@ -461,6 +462,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
