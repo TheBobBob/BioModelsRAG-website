@@ -418,7 +418,7 @@ class StreamlitApp:
                 n_results=3,
                 where={"document": {"$eq": model_id}},
             )
-            
+            st.write(query_results)
             best_recommendation = query_results['documents']
             st.write(best_recommendation)
             flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
@@ -461,6 +461,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
