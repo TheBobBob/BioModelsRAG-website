@@ -143,7 +143,7 @@ class BioModelSplitter:
                     item_id = f"{counter}_{model_id}"
 
                     prompt = f"""
-                    Summarize the following segment of Antimony in a clear, concise, and well-structured manner. Your summary should adhere to the following guidelines:
+                    Summarize the following segment of Antimony in a clear, concise, and well-structured manner. LIMIT SUMMARIES TO LESS THAN 50 WORDS. Your summary should adhere to the following guidelines:
 
                     1. **Detailed Summary**: Provide a comprehensive summary that accurately reflects the original content. Include relevant details without omitting key points.
                     
@@ -411,23 +411,17 @@ class StreamlitApp:
                         st.markdown(message["content"])
                             
     def generate_response(self, prompt, history, models):
-        query_results_final = ""
-
-        for model_id in models:
-            query_results = db.query(
-                query_texts = [prompt],
-                n_results=2,
-            )
-            st.write("-------------------------------")
-            st.write(f"{query_results} these are query results")
-            st.write("---------------------------------")
-            # guess the issue is that noything is matching 
-            best_recommendation = query_results['documents']
-            flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
-            query_results_final += "\n".join(flat_recommendation) + "\n\n"
-        
-        print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-        print(query_results_final)
+        query_results = db.query(
+            query_texts = [prompt],
+            n_results=2,
+        )
+        st.write("-------------------------------")
+        st.write(f"{query_results} these are query results")
+        st.write("---------------------------------")
+        # guess the issue is that noything is matching 
+        best_recommendation = query_results['documents']
+        flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
+        query_results_final = "\n".join(flat_recommendation) + "\n\n"
 
         prompt_template = f"""
         Using the context and previous conversation provided below, answer the following question. If the information is insufficient to answer the question, please state that clearly:
@@ -463,6 +457,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
