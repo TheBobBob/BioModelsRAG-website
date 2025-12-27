@@ -168,12 +168,12 @@ class BioModelSplitter:
                     st.write(final_summary)
                     if chat_completion.choices[0].message.content:
                         all_docs = db.get()
-                        st.write("All documents in DB:", all_docs)
-                        db.upsert(
-                            ids=[item_id],
-                            metadatas=[{"document": model_id}],
-                            documents=[final_summary],
-                        )
+                        #st.write("All documents in DB:", all_docs)
+                        #db.upsert(
+                            #ids=[item_id],
+                            #metadatas=[{"document": model_id}],
+                            #documents=[final_summary],
+                        #)
                     else:
                         print(f"Error: No content returned from Groq for model {model_id}.")
         except Exception as e:
@@ -421,6 +421,11 @@ class StreamlitApp:
                 n_results=3,
             )
             st.write(query_results)
+            query_results_f = db.query(
+                query_texts=["the first few words of one of your Antimony summaries"],
+                n_results=3
+            )
+            st.write(f"{query_results_f} test")
             # guess the issue is that noything is matching 
             best_recommendation = query_results['documents']
             st.write(best_recommendation)
@@ -464,6 +469,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
