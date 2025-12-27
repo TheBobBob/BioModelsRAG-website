@@ -165,15 +165,13 @@ class BioModelSplitter:
                     )
 
                     final_summary = model_id + "\n\n" + chat_completion.choices[0].message.content
-                    st.write(final_summary)
+                    
                     if chat_completion.choices[0].message.content:
-                        all_docs = db.get()
-                        #st.write("All documents in DB:", all_docs)
-                        #db.upsert(
-                            #ids=[item_id],
-                            #metadatas=[{"document": model_id}],
-                            #documents=[final_summary],
-                        #)
+                        db.upsert(
+                            ids=[item_id],
+                            metadatas=[{"document": model_id}],
+                            documents=[final_summary],
+                        )
                     else:
                         print(f"Error: No content returned from Groq for model {model_id}.")
         except Exception as e:
@@ -418,17 +416,13 @@ class StreamlitApp:
         for model_id in models:
             query_results = db.query(
                 query_texts = [prompt],
-                n_results=3,
+                n_results=2,
             )
-            st.write(query_results)
-            query_results_f = db.query(
-                query_texts=["the first few words of one of your Antimony summaries"],
-                n_results=3
-            )
-            st.write(f"{query_results_f} test")
+            st.write("-------------------------------")
+            st.write(f"{query_results} these are query results")
+            st.write("---------------------------------")
             # guess the issue is that noything is matching 
             best_recommendation = query_results['documents']
-            st.write(best_recommendation)
             flat_recommendation = [item for sublist in best_recommendation for item in (sublist if isinstance(sublist, list) else [sublist])]
             query_results_final += "\n".join(flat_recommendation) + "\n\n"
         
@@ -469,6 +463,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
