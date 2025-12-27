@@ -143,7 +143,7 @@ class BioModelSplitter:
                     item_id = f"{counter}_{model_id}"
 
                     prompt = f"""
-                    Summarize the following segment of Antimony in a clear, concise, and well-structured manner. LIMIT SUMMARIES TO LESS THAN 50 WORDS. Your summary should adhere to the following guidelines:
+                    Summarize the following segment of Antimony in a clear, concise, and well-structured manner. Your summary should adhere to the following guidelines:
 
                     1. **Detailed Summary**: Provide a comprehensive summary that accurately reflects the original content. Include relevant details without omitting key points.
                     
@@ -457,6 +457,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
