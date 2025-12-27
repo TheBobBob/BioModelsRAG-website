@@ -167,6 +167,8 @@ class BioModelSplitter:
                     final_summary = model_id + "\n\n" + chat_completion.choices[0].message.content
                     st.write(final_summary)
                     if chat_completion.choices[0].message.content:
+                        all_docs = db.get()
+                        st.write("All documents in DB:", all_docs)
                         db.upsert(
                             ids=[item_id],
                             metadatas=[{"document": model_id}],
@@ -462,6 +464,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
