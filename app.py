@@ -99,6 +99,30 @@ class ModelDownloader:
         else:
             raise ValueError(f"Failed to download the model from {model_url}")
 
+class ModelEditor:
+    @staticmethod
+    def edit_antimony(file_path, model_id):
+        st.subheader(f"Edit Model: {model_id}")
+
+        # Load the current antimony text
+        with open(file_path, "r") as f:
+            original_text = f.read()
+
+        edited_text = st.text_area(
+            f"Modify Antimony for {model_id}",
+            value=original_text,
+            height=400,
+            key=f"editor_{model_id}"
+        )
+
+        # Save button
+        if st.button(f"Save Changes to {model_id}", key=f"save_{model_id}"):
+            with open(file_path, "w") as f:
+                f.write(edited_text)
+
+            st.success(f"Saved changes for {model_id}!")
+            return file_path, True  # edited
+        return file_path, False  # not edited
 
 class AntimonyConverter:
     @staticmethod
@@ -289,6 +313,7 @@ class StreamlitApp:
         self.downloader = ModelDownloader()
         self.splitter = None 
         self.visualizer = SBMLNetworkVisualizer()
+        self.editor = ModelEditor()
 
     def run(self):
         st.title("BioModelsRAG")
@@ -378,11 +403,28 @@ class StreamlitApp:
             
             if GROQ_API_KEY:
                 if st.button("Analyze Selected Models"):
-                    with st.spinner("Analyzing selected models... This may take a while."):
+                    with st.spinner("Loading models for editing..."):
                         antimony_model_paths = get_antimony(selected_models, models)
-                        for model_id, antimony_path in zip(antimony_model_paths.keys(), antimony_model_paths.values()):
-                            self.splitter.split_biomodels(antimony_path, selected_models, model_id)
-                            st.info(f"Model {model_id} has successfully been added to the database! :) ")
+                
+                        edited_models = {}  # track which models were edited
+                
+                        # Step 1: let user edit
+                        for model_id, antimony_path in antimony_model_paths.items():
+                            new_path, edited = self.editor.edit_antimony(antimony_path, model_id)
+                            edited_models[model_id] = (new_path, edited)
+                
+                    if st.button("Re-run analysis with modifications"):
+                        for model_id, (new_path, edited) in edited_models.items():
+                
+                            if edited:
+                                # Clear old vectors belonging to this model
+                                db.delete(where={"document": model_id})
+                
+                            # Step 2: Re-split + summarize new/edited model
+                            self.splitter.split_biomodels(new_path, selected_models, model_id)
+                
+                        st.success("All models re-analyzed and updated in the database!")
+
                 
                 prompt_fin = st.chat_input(
                     "Enter Q to quit.", 
@@ -457,6 +499,7 @@ class StreamlitApp:
 if __name__ == "__main__":
     app = StreamlitApp()
     app.run()
+
 
 
 
